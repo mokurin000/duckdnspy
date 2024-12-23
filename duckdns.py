@@ -140,11 +140,11 @@ async def main():
         query_url += f"&ipv6={ipv6[0]}"
 
     async with aiohttp.ClientSession() as session:
-        async with session.get(f"{query_url}&clear=true"):
-            pass
         async with session.get(
-            query_url, timeout=ClientTimeout(ceil_threshold=10)
-        ) as resp:
+            f"{query_url}&clear=true", timeout=ClientTimeout(total=10)
+        ):
+            pass
+        async with session.get(query_url, timeout=ClientTimeout(total=10)) as resp:
             print(await resp.text())
 
     for domain in domains.split(","):
