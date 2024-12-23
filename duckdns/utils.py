@@ -28,7 +28,7 @@ async def clean_and_update_record(
             print(await resp.text())
 
 
-async def extract_if_inet6(remove_lan: bool = True):
+async def extract_if_inet6(remove_lan: bool = True, skip_wlan=True):
     def grouper(iterable, n):
         "Collect data into non-overlapping fixed-length chunks or blocks."
         iterators = [iter(iterable)] * n
@@ -42,7 +42,9 @@ async def extract_if_inet6(remove_lan: bool = True):
                 continue
             if remove_lan and line.startswith("fe80"):
                 continue
-            if remove_lan and line.endswith("lo"):
+            if skip_wlan and line.split()[-1].startswith("wlan"):
+                continue
+            if line.split()[-1] == "lo":
                 continue
 
             raw_hex, _, _, _, _, interface = line.split()
