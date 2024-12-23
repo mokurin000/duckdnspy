@@ -9,6 +9,7 @@ from ipaddress import IPv4Address
 
 import aiohttp
 import aiofiles
+from aiohttp import ClientTimeout
 
 
 REMOVE_LAN_IP = environ.get("REMOVE_LAN_IP", "1") == "1"
@@ -90,6 +91,9 @@ async def get_ip(
         case IPV4.PROC:
             ipv4 = await extract_fib_trie_data()
 
+        case _:
+            ipv4 = None
+
     match v6_source:
         case IPV6.PROC:
             ipv6 = await extract_if_inet6()
@@ -114,7 +118,7 @@ async def main():
 
     async with aiohttp.ClientSession() as session:
         ipv4, ipv6 = await get_ip(
-            session=session, v4_source=IPV4.IPIP_NET, v6_source=ipv6_method
+            session=session, v4_source=None, v6_source=ipv6_method
         )
 
     obj = {"ipv4": ipv4, "ipv6": ipv6}
@@ -136,7 +140,11 @@ async def main():
         query_url += f"&ipv6={ipv6[0]}"
 
     async with aiohttp.ClientSession() as session:
-        async with session.get(query_url) as resp:
+        async with session.get(f"{query_url}&clear=true"):
+            pass
+        async with session.get(
+            query_url, timeout=ClientTimeout(ceil_threshold=10)
+        ) as resp:
             print(await resp.text())
 
     for domain in domains.split(","):
