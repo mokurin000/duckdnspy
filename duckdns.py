@@ -1,7 +1,10 @@
+import sys
 import json
 import asyncio
+import tomllib
 from os import environ
 from enum import Enum
+from platform import system
 from ipaddress import IPv4Address
 
 import aiohttp
@@ -104,14 +107,40 @@ async def get_ip(
 
 
 async def main():
+    if system() == "Linux":
+        ipv6_method = IPV6.PROC
+    else:
+        ipv6_method = IPV6.IPIP_NET
+
     async with aiohttp.ClientSession() as session:
         ipv4, ipv6 = await get_ip(
-            session=session, v4_source=IPV4.IPIP_NET, v6_source=IPV6.PROC
+            session=session, v4_source=IPV4.IPIP_NET, v6_source=ipv6_method
         )
 
     obj = {"ipv4": ipv4, "ipv6": ipv6}
     json_output = json.dumps(obj=obj, indent=4, ensure_ascii=False)
-    print(json_output)
+    print(json_output, file=sys.stderr)
+
+    async with aiofiles.open("config.toml") as f:
+        config = tomllib.loads(await f.read())
+
+    domains: str = config.get("domains")
+    token: str = config.get("token")
+
+    query_url = (
+        f"https://www.duckdns.org/update?domains={domains}&token={token}&verbose=true"
+    )
+    if ipv4:
+        query_url += f"&ip={ipv4[0]}"
+    if ipv6:
+        query_url += f"&ipv6={ipv6[0]}"
+
+    async with aiohttp.ClientSession() as session:
+        async with session.get(query_url) as resp:
+            print(await resp.text())
+
+    for domain in domains.split(","):
+        print(f"{domain}.duckdns.org")
 
 
 if __name__ == "__main__":
