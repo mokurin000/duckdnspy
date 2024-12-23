@@ -6,7 +6,10 @@ from aiohttp import ClientTimeout
 
 
 async def clean_and_update_record(
-    token: str, domains: str, ipv4: str | None = None, ipv6: str | None = None
+    token: str,
+    domains: str,
+    ipv4: list[str] | None = None,
+    ipv6: list[str] | None = None,
 ):
     query_url = (
         f"https://www.duckdns.org/update?domains={domains}&token={token}&verbose=true"
