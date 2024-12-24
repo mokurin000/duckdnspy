@@ -33,7 +33,7 @@ async def get_ip(
             ipv6 = await extract_if_inet6(remove_lan=REMOVE_LAN_IP)
         case IPV6.IPIP_NET:
             async with aiohttp.ClientSession(
-                connector=aiohttp.TCPConnector(verify_ssl=False)
+                connector=aiohttp.TCPConnector(ssl=False)
             ) as insecure_session:
                 async with insecure_session.get(
                     "https://myip6.ipip.net/",
