@@ -14,7 +14,7 @@ from duckdns.utils import (
 )
 
 
-async def main():
+async def run():
     if system() == "Linux":
         ipv6_method = IPV6.PROC
     else:
@@ -41,5 +41,8 @@ async def main():
         print(f"{domain}.duckdns.org")
 
 
+def main():
+    asyncio.run(run())
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
