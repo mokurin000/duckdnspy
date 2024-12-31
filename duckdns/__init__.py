@@ -1,6 +1,6 @@
 import aiohttp
 
-from duckdns.typing import IPV4, IPV6
+from duckdns.model import IPV4, IPV6
 from duckdns.utils import extract_fib_trie_data, extract_if_inet6
 
 from os import environ

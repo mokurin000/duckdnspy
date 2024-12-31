@@ -8,7 +8,7 @@ import aiohttp
 import aiofiles
 
 from duckdns import get_ip
-from duckdns.typing import IPV6
+from duckdns.model import IPV6
 from duckdns.utils import (
     clean_and_update_record,
 )
@@ -43,6 +43,7 @@ async def run():
 
 def main():
     asyncio.run(run())
+
 
 if __name__ == "__main__":
     main()
