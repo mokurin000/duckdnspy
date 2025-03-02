@@ -1,8 +1,11 @@
+from logging import Logger
 from ipaddress import IPv4Address
 
 import aiohttp
 import aiofiles
 from aiohttp import ClientTimeout
+
+logger = Logger(name=__name__)
 
 
 async def clean_and_update_record(
@@ -24,6 +27,7 @@ async def clean_and_update_record(
             f"{query_url}&clear=true", timeout=ClientTimeout(total=10)
         ):
             pass
+        logger.info(f"GET to {query_url}")
         async with session.get(query_url, timeout=ClientTimeout(total=10)) as resp:
             print(await resp.text())
 
@@ -40,7 +44,7 @@ async def extract_if_inet6(remove_lan: bool = True, skip_wlan=True):
         for line in content.split("\n"):
             if not line:
                 continue
-            if remove_lan and line.startswith("fe80"):
+            if remove_lan and line.startswith("f"):
                 continue
             if skip_wlan and line.split()[-1].startswith("wlan"):
                 continue
