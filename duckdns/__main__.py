@@ -3,6 +3,7 @@ import json
 import asyncio
 import tomllib
 from platform import system
+from ipaddress import IPv6Address
 
 import aiohttp
 import aiofiles
@@ -34,6 +35,21 @@ async def run():
 
     domains: str = config.get("domains")
     token: str = config.get("token")
+    fixed_v6_suffix: str = config.get("fixed-v6-suffix")
+
+    if fixed_v6_suffix and ipv6:
+        ipv6_addr = IPv6Address(ipv6[0])
+        origin_addr = ipv6_addr.exploded.replace(":", "")
+        suffix, length = fixed_v6_suffix.split("/")
+
+        length = int(length)
+        part_len = -length // 4
+
+        prefix = origin_addr[: 32 - part_len] + part_len * "0"
+        suffix_addr = IPv6Address(suffix).exploded.replace(":", "")
+        result_addr = sum(map(lambda x: int(x, base=16), [prefix, suffix_addr]))
+        result_addr = IPv6Address(result_addr)
+        ipv6 = [result_addr]
 
     await clean_and_update_record(token=token, domains=domains, ipv4=ipv4, ipv6=ipv6)
 

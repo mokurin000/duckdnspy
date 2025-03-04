@@ -1,2 +1,4 @@
 domains = "xxxxx,xxxx,xxxxxxxx"
 token = ""
+
+fixed-v6-suffix = ""

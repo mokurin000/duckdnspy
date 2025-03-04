@@ -44,7 +44,7 @@ async def extract_if_inet6(remove_lan: bool = True, skip_wlan=True):
         for line in content.split("\n"):
             if not line:
                 continue
-            if remove_lan and line.startswith("f"):
+            if remove_lan and line.startswith("fe8"):
                 continue
             if skip_wlan and line.split()[-1].startswith("wlan"):
                 continue
