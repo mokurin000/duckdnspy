@@ -9,7 +9,7 @@ REMOVE_LAN_IP = environ.get("REMOVE_LAN_IP", "1") == "1"
 
 
 async def get_ip(
-    session: aiohttp.ClientSession, v4_source: IPV4, v6_source: IPV6
+    session: aiohttp.ClientSession, v4_source: IPV4 | None, v6_source: IPV6 | None
 ) -> tuple[list[str] | None, list[str] | None]:
     match v4_source:
         case IPV4.IPIFY:
@@ -19,8 +19,8 @@ async def get_ip(
 
         case IPV4.IPIP_NET:
             async with session.get("https://myip.ipip.net/") as resp:
-                data: str = await resp.text()
-                ipv4 = [data.removeprefix("当前 IP：").split()[0]]
+                text: str = await resp.text()
+                ipv4 = [text.removeprefix("当前 IP：").split()[0]]
 
         case IPV4.PROC:
             ipv4 = await extract_fib_trie_data(remove_lan=REMOVE_LAN_IP)
@@ -33,12 +33,14 @@ async def get_ip(
             ipv6 = await extract_if_inet6(remove_lan=REMOVE_LAN_IP)
         case IPV6.IPIP_NET:
             async with aiohttp.ClientSession(
-                connector=aiohttp.TCPConnector(ssl=False)
+                connector=aiohttp.TCPConnector()
             ) as insecure_session:
                 async with insecure_session.get(
-                    "https://myip6.ipip.net/",
+                    "https://api6.ipify.org",
                 ) as resp:
-                    data: str = await resp.text()
-                    ipv6 = [data.removeprefix("当前 IP：").split()[0]]
+                    text: str = await resp.text()
+                    ipv6 = [text]
+        case _:
+            ipv6 = None
 
     return ipv4, ipv6
